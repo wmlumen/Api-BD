@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Proyecto API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .container {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Multi-Proyecto API</h1>
+        <p>API para la gestión de múltiples proyectos y usuarios.</p>
+        
+        <h2>Requisitos</h2>
+        <ul>
+            <li>Node.js (v14 o superior)</li>
+            <li>MongoDB</li>
+            <li>npm o yarn</li>
+        </ul>
+
+        <h2>Instalación</h2>
+        <ol>
+            <li>Clonar el repositorio</li>
+            <li>Instalar dependencias: <code>npm install</code></li>
+            <li>Crear archivo <code>.env</code> basado en <code>config/.env.example</code></li>
+            <li>Configurar las variables de entorno necesarias</li>
+        </ol>
+
+        <h2>Uso</h2>
+        <h3>Desarrollo</h3>
+        <pre><code>npm run dev</code></pre>
+
+        <h3>Producción</h3>
+        <pre><code>npm start</code></pre>
+
+        <h3>Poblar base de datos</h3>
+        <pre><code>npm run seed</code></pre>
+
+        <h2>Estructura del Proyecto</h2>
+        <pre>
+multi-proyecto-api/
+├── src/
+│   ├── api/           # Rutas y controladores
+│   ├── models/        # Modelos de MongoDB
+│   └── utils/         # Utilidades y middleware
+├── public/            # Archivos estáticos
+├── config/            # Archivos de configuración
+├── scripts/           # Scripts de utilidad
+├── .env.example       # Ejemplo de variables de entorno
+├── package.json       # Dependencias y scripts
+└── README.html        # Documentación
+        </pre>
+
+        <h2>Variables de Entorno</h2>
+        <p>Crear un archivo <code>.env</code> en la raíz del proyecto con las siguientes variables:</p>
+        <pre>
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/multiproyecto
+JWT_SECRET=tu_clave_secreta_aqui
+        </pre>
+
+        <h2>Endpoints</h2>
+        <h3>Autenticación</h3>
+        <ul>
+            <li><code>POST /api/auth/register</code> - Registrar nuevo usuario</li>
+            <li><code>POST /api/auth/login</code> - Iniciar sesión</li>
+        </ul>
+
+        <h3>Usuarios</h3>
+        <ul>
+            <li><code>GET /api/users</code> - Obtener todos los usuarios</li>
+            <li><code>GET /api/users/:id</code> - Obtener usuario por ID</li>
+        </ul>
+
+        <h3>Proyectos</h3>
+        <ul>
+            <li><code>GET /api/projects</code> - Obtener todos los proyectos</li>
+            <li><code>POST /api/projects</code> - Crear nuevo proyecto</li>
+            <li><code>GET /api/projects/:id</code> - Obtener proyecto por ID</li>
+        </ul>
+
+        <h2>Licencia</h2>
+        <p>MIT</p>
+    </div>
+</body>
+</html>
