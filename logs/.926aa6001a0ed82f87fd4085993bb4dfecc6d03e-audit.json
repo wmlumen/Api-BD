@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\Administrator\\Documents\\GitHub\\API-BD\\multi-proyecto-api\\logs\\.926aa6001a0ed82f87fd4085993bb4dfecc6d03e-audit.json",
+    "files": [
+        {
+            "date": 1756181956300,
+            "name": "C:\\Users\\Administrator\\Documents\\GitHub\\API-BD\\multi-proyecto-api\\logs\\combined-2025-08-26.log",
+            "hash": "80faa161a3034c7cc2fb012fa0c72492c7c3beaa78221c11e6a8f93e5606185a"
+        }
+    ],
+    "hashType": "sha256"
+}

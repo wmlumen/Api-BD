@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Explorer - multi-proyecto-api</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 0; padding: 16px; background:#0b1320; color:#e6edf3; }
+    h1 { margin: 0 0 12px; font-size: 20px; }
+    .bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom: 12px; }
+    input, select, button { padding:8px 10px; border-radius:6px; border:1px solid #2d3853; background:#0f1b2d; color:#e6edf3; }
+    button { cursor:pointer; }
+    .grid { display:grid; grid-template-columns: 260px 1fr; gap:12px; }
+    .card { background:#0f1b2d; border:1px solid #2d3853; border-radius:10px; }
+    .card h2 { font-size:16px; margin:12px; }
+    .list { max-height: 60vh; overflow:auto; padding:0 8px 12px; }
+    .list button { width:100%; text-align:left; margin:4px 0; }
+    pre { white-space: pre-wrap; background:#0b1320; border:1px solid #2d3853; padding:10px; border-radius:8px; overflow:auto; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border:1px solid #2d3853; padding:6px 8px; font-size: 12px; }
+    th { background:#0b1320; position: sticky; top:0; }
+  </style>
+</head>
+<body>
+  <h1>Data Explorer</h1>
+  <div class="bar">
+    <label>Base URL <input id="baseUrl" value="" placeholder="https://tu-app.vercel.app" /></label>
+    <button id="loadBtn">Cargar Tablas</button>
+    <select id="tables"></select>
+    <button id="schemaBtn">Ver Esquema</button>
+    <button id="sampleBtn">Ver Muestra</button>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Tablas</h2>
+      <div class="list" id="tablesList"></div>
+    </div>
+    <div class="card">
+      <h2>Resultado</h2>
+      <div style="padding: 0 12px 12px">
+        <div id="result"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const baseUrlInput = document.getElementById('baseUrl');
+    const loadBtn = document.getElementById('loadBtn');
+    const tablesSelect = document.getElementById('tables');
+    const schemaBtn = document.getElementById('schemaBtn');
+    const sampleBtn = document.getElementById('sampleBtn');
+    const resultDiv = document.getElementById('result');
+    const tablesList = document.getElementById('tablesList');
+
+    function apiBase() {
+      const val = (baseUrlInput.value || '').trim();
+      if (!val) return window.location.origin; // por defecto, mismo host
+      return val.replace(/\/$/, '');
+    }
+
+    async function fetchJSON(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${res.status}: ${res.statusText}`);
+      return res.json();
+    }
+
+    function renderSchema(schema) {
+      const pre = document.createElement('pre');
+      pre.textContent = JSON.stringify(schema, null, 2);
+      return pre;
+    }
+
+    function renderSample({ table, rows }) {
+      if (!rows || !rows.length) {
+        const p = document.createElement('p');
+        p.textContent = `No hay datos en ${table}.`;
+        return p;
+      }
+      const columns = Object.keys(rows[0]);
+      const tableEl = document.createElement('table');
+      const thead = document.createElement('thead');
+      const trh = document.createElement('tr');
+      columns.forEach(c => { const th = document.createElement('th'); th.textContent = c; trh.appendChild(th); });
+      thead.appendChild(trh);
+      const tbody = document.createElement('tbody');
+      rows.forEach(r => {
+        const tr = document.createElement('tr');
+        columns.forEach(c => { const td = document.createElement('td'); td.textContent = String(r[c]); tr.appendChild(td); });
+        tbody.appendChild(tr);
+      });
+      tableEl.appendChild(thead);
+      tableEl.appendChild(tbody);
+      return tableEl;
+    }
+
+    async function loadTables() {
+      resultDiv.textContent = 'Cargando tablas...';
+      try {
+        const data = await fetchJSON(`${apiBase()}/api/v1/meta/tables`);
+        tablesSelect.innerHTML = '';
+        tablesList.innerHTML = '';
+        (data.tables || []).forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t; opt.textContent = t;
+          tablesSelect.appendChild(opt);
+
+          const btn = document.createElement('button');
+          btn.textContent = t;
+          btn.onclick = () => { tablesSelect.value = t; };
+          tablesList.appendChild(btn);
+        });
+        resultDiv.textContent = 'Tablas cargadas.';
+      } catch (e) {
+        resultDiv.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    async function showSchema() {
+      resultDiv.textContent = 'Cargando esquema...';
+      try {
+        const data = await fetchJSON(`${apiBase()}/api/v1/meta/schema`);
+        resultDiv.innerHTML = '';
+        resultDiv.appendChild(renderSchema(data.schema));
+      } catch (e) {
+        resultDiv.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    async function showSample() {
+      const t = tablesSelect.value;
+      if (!t) { resultDiv.textContent = 'Selecciona una tabla'; return; }
+      resultDiv.textContent = `Cargando muestra de ${t}...`;
+      try {
+        const data = await fetchJSON(`${apiBase()}/api/v1/meta/table/${encodeURIComponent(t)}/sample?limit=50`);
+        resultDiv.innerHTML = '';
+        resultDiv.appendChild(renderSample(data));
+      } catch (e) {
+        resultDiv.textContent = 'Error: ' + e.message;
+      }
+    }
+
+    loadBtn.onclick = loadTables;
+    schemaBtn.onclick = showSchema;
+    sampleBtn.onclick = showSample;
+
+    // intento inicial
+    loadTables().catch(() => {});
+  </script>
+</body>
+</html>

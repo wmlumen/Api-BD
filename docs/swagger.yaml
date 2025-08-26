@@ -1,0 +1,494 @@
+openapi: 3.0.0
+info:
+  title: Multi-Project API with AI Integration
+  description: |
+    A multi-tenant API with AI-powered query translation and execution.
+    This API allows users to manage projects, databases, and execute queries using natural language.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+  - url: https://api.example.com/v1
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Enter the token with the `Bearer ` prefix, e.g. "Bearer abcde12345".
+        
+        You can obtain a token by authenticating with your credentials.
+  
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error message
+          example: "Resource not found"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-08-25T23:59:59.999Z"
+    
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-08-25T23:59:59.999Z"
+    
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "My Project"
+        slug:
+          type: string
+          example: "my-project"
+        description:
+          type: string
+          example: "A sample project"
+        is_public:
+          type: boolean
+          example: false
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-08-25T23:59:59.999Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2023-08-25T23:59:59.999Z"
+    
+    ProjectMember:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        first_name:
+          type: string
+          example: "John"
+        last_name:
+          type: string
+          example: "Doe"
+        role:
+          type: string
+          enum: [user, editor, admin]
+          example: "admin"
+        added_at:
+          type: string
+          format: date-time
+          example: "2023-08-25T23:59:59.999Z"
+    
+    Database:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        name:
+          type: string
+          example: "Production DB"
+        description:
+          type: string
+          example: "Main production database"
+        type:
+          type: string
+          enum: [postgresql, mysql, mongodb, sqlite, mssql]
+          example: "postgresql"
+        is_primary:
+          type: boolean
+          example: true
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-08-25T23:59:59.999Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2023-08-25T23:59:59.999Z"
+    
+    QueryResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items: {}
+          description: Result rows from the query
+        meta:
+          type: object
+          properties:
+            execution_time_ms:
+              type: number
+              example: 15.25
+            row_count:
+              type: integer
+              example: 5
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - document_id
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  minLength: 8
+                  example: "securepassword123"
+                document_id:
+                  type: string
+                  example: "12345678"
+                first_name:
+                  type: string
+                  example: "John"
+                last_name:
+                  type: string
+                  example: "Doe"
+                phone:
+                  type: string
+                  example: "+1234567890"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      refreshToken:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          description: Validation error or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user and get JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identifier
+                - password
+              properties:
+                identifier:
+                  type: string
+                  description: Email, phone, or document ID
+                  example: "user@example.com"
+                password:
+                  type: string
+                  example: "securepassword123"
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      refreshToken:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /projects:
+    get:
+      tags: [Projects]
+      summary: Get all projects for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Project'
+  
+  /query/ask:
+    post:
+      tags: [Queries]
+      summary: Ask a question in natural language and get results
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - question
+                - project_id
+                - database_id
+              properties:
+                question:
+                  type: string
+                  example: "Show me the top 10 customers by total spending"
+                project_id:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+                database_id:
+                  type: string
+                  format: uuid
+                  example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Query executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/QueryResult'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user info
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User information
+        '401':
+          description: Not authenticated
+
+  /auth/refresh-token:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+        '401':
+          description: Invalid or expired refresh token
+
+  /query/translate:
+    post:
+      tags: [Queries]
+      summary: Translate natural language to database query
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+                - project_id
+              properties:
+                query:
+                  type: string
+                project_id:
+                  type: string
+                  format: uuid
+                database_id:
+                  type: string
+                  format: uuid
+                schema:
+                  type: object
+      responses:
+        '200':
+          description: Query translated successfully
+        '400':
+          description: Invalid request
+
+  /query/execute:
+    post:
+      tags: [Queries]
+      summary: Execute a database query
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+                - project_id
+                - database_id
+              properties:
+                query:
+                  type: string
+                project_id:
+                  type: string
+                  format: uuid
+                database_id:
+                  type: string
+                  format: uuid
+                params:
+                  type: array
+                is_ai_generated:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Query executed successfully
+        '400':
+          description: Invalid request or query
+        '403':
+          description: Insufficient permissions
+
+  /query/history:
+    get:
+      tags: [Queries]
+      summary: Get query history for a project
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: project_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Query history retrieved successfully
+        '400':
+          description: Invalid request

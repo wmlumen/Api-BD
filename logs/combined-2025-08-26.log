@@ -1,0 +1,14 @@
+2025-08-26 08:30:12:3012 [[31merror[39m]: [31mError connecting to email server: connect ECONNREFUSED 127.0.0.1:587[39m
+2025-08-26 08:31:27:3127 [[31merror[39m]: [31mError connecting to email server: connect ECONNREFUSED 127.0.0.1:587[39m
+2025-08-26 08:58:41:5841 [[32minfo[39m]: [32mLoaded 3 email templates[39m
+2025-08-26 08:58:41:5841 [[32minfo[39m]: [32mServer is running in development mode[39m
+2025-08-26 08:58:41:5841 [[32minfo[39m]: [32mListening on port 5000[39m
+2025-08-26 08:58:41:5841 [[32minfo[39m]: [32mAPI Documentation available at http://localhost:5000/api-docs[39m
+2025-08-26 09:01:21:121 [[32minfo[39m]: [32mLoaded 3 email templates[39m
+2025-08-26 09:01:21:121 [[32minfo[39m]: [32mServer is running in development mode[39m
+2025-08-26 09:01:21:121 [[32minfo[39m]: [32mListening on port 5000[39m
+2025-08-26 09:01:21:121 [[32minfo[39m]: [32mAPI Documentation available at http://localhost:5000/api-docs[39m
+2025-08-26 09:08:00:80 [[32minfo[39m]: [32mLoaded 3 email templates[39m
+2025-08-26 09:08:00:80 [[32minfo[39m]: [32mServer is running in development mode[39m
+2025-08-26 09:08:00:80 [[32minfo[39m]: [32mListening on port 5000[39m
+2025-08-26 09:08:00:80 [[32minfo[39m]: [32mAPI Documentation available at http://localhost:5000/api-docs[39m
